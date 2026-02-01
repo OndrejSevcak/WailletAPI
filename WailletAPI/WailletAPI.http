@@ -1,0 +1,14 @@
+@WailletAPI_HostAddress = http://localhost:5254
+
+GET {{WailletAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+POST {{WailletAPI_HostAddress}}/api/account
+Accept: application/json
+
+###
+
+GET {{WailletAPI_HostAddress}}/api/account/1
+Accept: application/json
