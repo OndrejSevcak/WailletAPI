@@ -12,11 +12,13 @@ public class UserController : ControllerBase
 {
     private readonly UserRepository _repository;
     private readonly IPasswordHashService _passwordService;
+    private readonly IJwtTokenService _jwtTokenService;
 
-    public UserController(UserRepository repository, IPasswordHashService passwordService)
+    public UserController(UserRepository repository, IPasswordHashService passwordService, IJwtTokenService jwtTokenService)
     {
         _repository = repository;
         _passwordService = passwordService;
+        _jwtTokenService = jwtTokenService;
     }
 
     [HttpPost("register")]
@@ -57,6 +59,12 @@ public class UserController : ControllerBase
         if (!valid)
             return Unauthorized();
 
-        return Ok(new { user.UserKey, user.UserName, user.NickName });
+        var token = _jwtTokenService.GenerateToken(user);
+        
+        return Ok(new LoginResponse(
+            AccessToken: token,
+            TokenType: "Bearer",
+            ExpiresIn: 3600
+        ));
     }
 }
