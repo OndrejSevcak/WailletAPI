@@ -14,9 +14,12 @@ public class User
     [MaxLength(100)]
     public required string UserName { get; set; }
     
+    // Password is now stored as hash + salt (byte[]). We will generate these with PBKDF2.
     [Required]
-    [MaxLength(256)]
-    public required string Password { get; set; }
+    public required byte[] PasswordHash { get; set; }
+
+    [Required]
+    public required byte[] PasswordSalt { get; set; }
 
     [Required]
     [MaxLength(100)]

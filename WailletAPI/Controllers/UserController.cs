@@ -1,0 +1,64 @@
+using Microsoft.AspNetCore.Mvc;
+using WailletAPI.Models;
+using WailletAPI.Repository;
+using WailletAPI.Services;
+
+namespace WailletAPI.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class UserController : ControllerBase
+{
+    private readonly UserRepository _repository;
+    private readonly IPasswordHashService _passwordService;
+
+    public UserController(UserRepository repository, IPasswordHashService passwordService)
+    {
+        _repository = repository;
+        _passwordService = passwordService;
+    }
+
+    public record RegisterRequest(string UserName, string Password, string NickName);
+    public record LoginRequest(string UserName, string Password);
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest req)
+    {
+        if (string.IsNullOrWhiteSpace(req.UserName) || string.IsNullOrWhiteSpace(req.Password))
+            return BadRequest("UserName and Password are required");
+
+        var existing = await _repository.GetByUserNameAsync(req.UserName);
+        if (existing != null)
+            return Conflict("UserName already taken");
+
+        _passwordService.CreatePasswordHash(req.Password, out var hash, out var salt);
+
+        var user = new User
+        {
+            UserName = req.UserName,
+            PasswordHash = hash,
+            PasswordSalt = salt,
+            NickName = req.NickName,
+            Level = 1,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _repository.AddUserAsync(user);
+
+        return Ok(new { user.UserKey, user.UserName, user.NickName });
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest req)
+    {
+        var user = await _repository.GetByUserNameAsync(req.UserName);
+        if (user == null)
+            return Unauthorized();
+
+        var valid = _passwordService.VerifyPassword(req.Password, user.PasswordHash, user.PasswordSalt);
+        if (!valid)
+            return Unauthorized();
+
+        return Ok(new { user.UserKey, user.UserName, user.NickName });
+    }
+}

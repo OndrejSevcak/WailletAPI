@@ -4,21 +4,11 @@ namespace WailletAPI.Repository;
 
 public class AccountRepository
 {
-    private readonly WailletAPI.Data.WailletDbContext _context;
+    private readonly Data.WailletDbContext _context;
 
-    public AccountRepository(WailletAPI.Data.WailletDbContext context)
+    public AccountRepository(Data.WailletDbContext context)
     {
         _context = context;
-    }
-
-    public IEnumerable<Account> GetAllAccounts()
-    {
-        return _context.Accounts.ToList();
-    }
-
-    public Account? GetAccountById(long accKey)
-    {
-        return _context.Accounts.Find(accKey);
     }
 
     public async Task AddAccount(Account account)
