@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using WailletAPI.Configuration;
 using WailletAPI.Dto;
 using WailletAPI.Models;
 using WailletAPI.Repository;
@@ -13,12 +15,14 @@ public class UserController : ControllerBase
     private readonly UserRepository _repository;
     private readonly IPasswordHashService _passwordService;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly JwtSettings _jwtSettings;
 
-    public UserController(UserRepository repository, IPasswordHashService passwordService, IJwtTokenService jwtTokenService)
+    public UserController(UserRepository repository, IPasswordHashService passwordService, IJwtTokenService jwtTokenService, IOptions<JwtSettings> jwtSettings)
     {
         _repository = repository;
         _passwordService = passwordService;
         _jwtTokenService = jwtTokenService;
+        _jwtSettings = jwtSettings.Value;
     }
 
     [HttpPost("register")]
@@ -64,7 +68,7 @@ public class UserController : ControllerBase
         return Ok(new LoginResponse(
             AccessToken: token,
             TokenType: "Bearer",
-            ExpiresIn: 3600
+            ExpiresIn: _jwtSettings.ExpirationMinutes * 60
         ));
     }
 }
