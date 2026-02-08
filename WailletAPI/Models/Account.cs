@@ -26,5 +26,13 @@ namespace WailletAPI.Models
 
         [Column("crypto_flag")]
         public bool CryptoFlag { get; set; }
+        
+        [Required]
+        [Column("user_key")]
+        public long UserKey { get; set; }
+
+        [ForeignKey(nameof(UserKey))] 
+        public User User { get; set; } = null;
+
     }
 }

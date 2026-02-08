@@ -29,4 +29,7 @@ public class User
 
     [Required]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // Navigation: one user has many accounts
+    public ICollection<Account> Accounts { get; set; } = new List<Account>();
 }

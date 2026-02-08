@@ -52,9 +52,55 @@ namespace WailletAPI.Migrations
                         .HasColumnType("varchar(10)")
                         .HasColumnName("currency_code");
 
+                    b.Property<long>("UserKey")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_key");
+
                     b.HasKey("AccKey");
 
+                    b.HasIndex("UserKey")
+                        .IsUnique()
+                        .HasFilter("crypto_flag = 0");
+
+                    b.HasIndex("UserKey", "CurrencyCode")
+                        .IsUnique()
+                        .HasFilter("crypto_flag = 1");
+
                     b.ToTable("Accounts");
+                });
+
+            modelBuilder.Entity("WailletAPI.Models.CryptoCurrency", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("CryptoCurrencies");
+
+                    b.HasData(
+                        new
+                        {
+                            Code = "BTC",
+                            Name = "Bitcoin"
+                        },
+                        new
+                        {
+                            Code = "ETH",
+                            Name = "Ethereum"
+                        },
+                        new
+                        {
+                            Code = "LTC",
+                            Name = "Litecoin"
+                        });
                 });
 
             modelBuilder.Entity("WailletAPI.Models.User", b =>
@@ -95,6 +141,22 @@ namespace WailletAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("WailletAPI.Models.Account", b =>
+                {
+                    b.HasOne("WailletAPI.Models.User", "User")
+                        .WithMany("Accounts")
+                        .HasForeignKey("UserKey")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WailletAPI.Models.User", b =>
+                {
+                    b.Navigation("Accounts");
                 });
 #pragma warning restore 612, 618
         }

@@ -21,6 +21,8 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"))
 // Register services
 builder.Services.AddScoped<AccountRepository>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<CryptoCurrencyRepository>();
+builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 

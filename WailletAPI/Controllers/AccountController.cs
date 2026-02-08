@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using WailletAPI.Dto;
 using WailletAPI.Models;
-using WailletAPI.Repository;
+using WailletAPI.Services;
 
 namespace WailletAPI.Controllers;
 
@@ -9,28 +9,32 @@ namespace WailletAPI.Controllers;
 [Route("api/[controller]")]
 public class AccountController : ControllerBase
 {
-    private readonly AccountRepository _repository;
+    private readonly AccountService _service;
 
-    public AccountController(AccountRepository repository)
+    public AccountController(AccountService service)
     {
-        _repository = repository;
+        _service = service;
     }
     
     [HttpPost]
-    public async Task<IActionResult> CreateAccount()
+    public async Task<IActionResult> CreateAccount([FromBody] CreateAccountRequest req)
     {
-        Account acc = new Account
-        {
-            CreatedAt = DateTime.UtcNow,
-            Balance = 0,
-            Active = true,
-            CurrencyCode = "EUR",
-            CryptoFlag = false
-        };
-        
-        await _repository.AddAccount(acc);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        return Ok();
+        try
+        {
+            var accountDto = await _service.CreateAccountAsync(req);
+            return CreatedAtAction(nameof(GetAccount), new { id = accountDto.AccKey }, accountDto);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound("User not found");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
     [HttpGet("{id}")]
