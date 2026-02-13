@@ -41,8 +41,10 @@ Infrastructure
 
 ## High-Level System Architecture Diagram
 
+```mermaid
 flowchart TB
-FE[React Frontend]
+
+    FE[React Frontend]
 
     API[API Gateway<br/>ASP.NET Core API]
 
@@ -75,8 +77,7 @@ FE[React Frontend]
     INF --> REDIS
     INF --> PRICE
     BL --> RPC
-
-
+```
 
 ## Core Domain Models
 
